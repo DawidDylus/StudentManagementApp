@@ -37,6 +37,22 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>com.google.cloud.tools</groupId>
+				<artifactId>jib-maven-plugin</artifactId>
+				<version>3.1.2</version>
+				<configuration>
+					<from>
+						<image>openjdk:16</image>
+					</from>
+					<container>
+						<ports>
+							<port>8080</port>
+						</ports>
+						<format>OCI</format>
+					</container>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
@@ -75,7 +91,7 @@
 								 <goal>install-node-and-npm</goal>
 							 </goals>
 							 <configuration>
-								 <nodeVersion>v15.4.0</nodeVersion>
+								 <nodeVersion>v16.2.0</nodeVersion>
 								 <npmVersion>7.3.0</npmVersion>
 							 </configuration>
 						 </execution>
