@@ -1,9 +1,10 @@
 package com.students.management.StudentManagementApp.student;
 
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpStatusCodeException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -16,8 +17,14 @@ public class StudentController {
     private final StudentService studentService;
 
     @GetMapping
-    public List<Student> getAllStudents(){
-        return studentService.getAllStudent();
+    public ResponseEntity<List<Student>> getAllStudents(){
+        return ResponseEntity.ok(studentService.getAllStudent());
+    }
+
+    @PostMapping
+    public ResponseEntity<Student> addStudent(@RequestBody Student student){
+        studentService.addStudent(student);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
 }

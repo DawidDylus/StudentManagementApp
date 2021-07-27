@@ -1,7 +1,7 @@
 import './App.css';
 import { getAllStudents } from "./client";
 import React, { useState, useEffect } from 'react';
-import { Layout, Menu, Breadcrumb, Table, Spin, Empty } from 'antd';
+import { Layout, Menu, Breadcrumb, Table, Spin, Empty, Button, Badge, Tag, Avatar } from 'antd';
 import {
   DesktopOutlined,
   PieChartOutlined,
@@ -9,20 +9,40 @@ import {
   TeamOutlined,
   UserOutlined,
   LoadingOutlined,
+  PlusOutlined
 } from '@ant-design/icons';
 
-
+import StudentDrawerForm from './StudentDrawerForm';
 
 function App() {
 
   const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
-  const columns = [
+  const TheAvatar = ({ name }) => {
+    let trim = name.trim();
+    if (trim.length === 0) {
+      return <Avatar icon={<UserOutlined />} />;
+    }
+    const split = trim.split(" ");
+    if (split.length === 1) {
+      return <Avatar>{name.charAt(0)}</Avatar>;
+    }
+    return <Avatar>
+      {`${name.charAt(0)}${name.charAt(name.length - 1)}`}
+    </Avatar>;
+  };
 
+  const columns = [
+    {
+      title: '',
+      dataIndex: 'avatar',
+      key: 'avatar',
+      render: (text, student) => <TheAvatar name={student.name} />
+    },
     {
       title: 'Id',
       dataIndex: 'id',
-      key: 'id,'
+      key: 'id',
     },
     {
       title: 'Name',
@@ -42,7 +62,7 @@ function App() {
 
   ];
 
-
+  const [showDrawer, setShowDrawer] = useState(false);
   const [students, setStudents] = useState([]);
 
   const { Header, Content, Footer, Sider } = Layout;
@@ -75,14 +95,23 @@ function App() {
     if (students.length <= 0) {
       return <Empty />;
     }
-    return <Table
-      dataSource={students}
-      columns={columns}
-      bordered
-      title={() => "Students"}
-      pagination={{ pageSize: 50 }}
-      scroll={{ y: 240 }}
-      rowKey={(student) => student.id} />
+    return <>
+      <StudentDrawerForm setShowDrawer={setShowDrawer} showDrawer={showDrawer} fetchStudents={fetchStudents} />
+      <Table
+        dataSource={students}
+        columns={columns}
+        bordered
+        title={() => <>
+
+          <Tag>Number of students</Tag>
+          <Badge count={students.length} className="site-badge-count-4" />
+          <br /><br />
+          <Button size='small' type='primary' shape="round" icon={<PlusOutlined />} onClick={() => setShowDrawer(!showDrawer)} > Add New Student</Button>
+        </>}
+        pagination={{ pageSize: 50 }}
+        scroll={{ y: 550 }}
+        rowKey={(student) => student.id} />
+    </>
   }
 
   return (
@@ -118,7 +147,7 @@ function App() {
             <Breadcrumb.Item>Bill</Breadcrumb.Item>
           </Breadcrumb>
           <div className="site-layout-background" style={{ padding: 24, minHeight: 360 }}>
-            <RenderStudents />
+            {RenderStudents()}
           </div>
         </Content>
         <Footer style={{ textAlign: 'center' }}>Made by Dawid Dylus</Footer>
