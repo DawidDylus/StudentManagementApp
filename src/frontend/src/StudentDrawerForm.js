@@ -1,36 +1,64 @@
 // StudentDrawerForm.js
 
 import { Drawer, Input, Col, Select, Form, Row, Button, Spin } from 'antd';
-import { addNewStudent } from './client';
+import { addNewStudent, editStudent } from './client';
 import { LoadingOutlined } from '@ant-design/icons';
 import React, { useState } from 'react';
-import { successNotification, errorNotification} from './Notification';
+import { successNotification, errorNotification } from './Notification';
 
 const { Option } = Select;
 
-function StudentDrawerForm({ showDrawer, setShowDrawer, fetchStudents }) {
-    const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
-    const onCLose = () => setShowDrawer(false);
-    const [submitting, setSubmitting] = useState(false);
+function StudentDrawerForm({ showDrawer, setShowDrawer, fetchStudents, student = null, setStudent }) {
+    const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;    
+    const [submitting, setSubmitting] = useState(false);  
 
-    const onFinish = student => {
+    const onCLose = () => {
+        setStudent({});    
+        setSubmitting(false);  
+        setShowDrawer(false);   
+       
+    }
+
+    const onFinish = stud => {
         setSubmitting(true);
-        addNewStudent(student)
-            .then(() => {
-                setShowDrawer(false);
-                fetchStudents();
-                successNotification("Student successfully added!", `${student.name} was added to the system.`);
-            })
-            .catch(err => {
-                console.log(err);               
-            })
-            .finally(() => setShowDrawer(false));
-
+        console.log(student);
+        if (JSON.stringify(student) !== '{}') {
+            const newStudent = Object.assign({}, stud);
+            newStudent.id = student.id;
+           
+            editStudent(newStudent)
+                .then(() => {
+                    setShowDrawer(false);
+                    fetchStudents();
+                    successNotification("Student successfully edited!", `${newStudent.name}`);
+                })
+                .catch(err => {
+                    console.log(err);
+                })
+                .finally(() =>                    
+                    setStudent({})                   
+                );
+        }
+        else {
+            addNewStudent(stud)
+                .then(() => {
+                    setShowDrawer(false);
+                    fetchStudents();
+                    successNotification("Student successfully added!", `${stud.name} was added to the system.`);
+                })
+                .catch(err => {
+                    console.log(err);
+                });                
+        }
+        setSubmitting(false);  
+        setShowDrawer(false);
     };
 
     const onFinishFailed = errorInfo => {
         alert(JSON.stringify(errorInfo, null, 2));
     };
+
+   
 
     return <Drawer
         title="Create new student"
@@ -50,6 +78,9 @@ function StudentDrawerForm({ showDrawer, setShowDrawer, fetchStudents }) {
             </div>
         }
     >
+     { 
+         showDrawer !== true ? (null) : (
+        
         <Form layout="vertical"
             onFinishFailed={onFinishFailed}
             onFinish={onFinish}
@@ -60,6 +91,7 @@ function StudentDrawerForm({ showDrawer, setShowDrawer, fetchStudents }) {
                         name="name"
                         label="Name"
                         rules={[{ required: true, message: 'Please enter student name' }]}
+                        initialValue={student.name}
                     >
                         <Input placeholder="Please enter student name" />
                     </Form.Item>
@@ -69,6 +101,7 @@ function StudentDrawerForm({ showDrawer, setShowDrawer, fetchStudents }) {
                         name="email"
                         label="Email"
                         rules={[{ required: true, message: 'Please enter student email' }]}
+                        initialValue={student.email}
                     >
                         <Input placeholder="Please enter student email" />
                     </Form.Item>
@@ -80,6 +113,7 @@ function StudentDrawerForm({ showDrawer, setShowDrawer, fetchStudents }) {
                         name="gender"
                         label="gender"
                         rules={[{ required: true, message: 'Please select a gender' }]}
+                        initialValue={student.gender}
                     >
                         <Select placeholder="Please select a gender">
                             <Option value="MALE">MALE</Option>
@@ -99,9 +133,10 @@ function StudentDrawerForm({ showDrawer, setShowDrawer, fetchStudents }) {
                 </Col>
             </Row>
             <Row>
-                {submitting && <Spin indicator={antIcon}/>}
+                {submitting && <Spin indicator={antIcon} />}
             </Row>
         </Form>
+     )}
     </Drawer>
 }
 

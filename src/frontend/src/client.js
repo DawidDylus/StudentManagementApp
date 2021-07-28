@@ -16,11 +16,29 @@ export const getAllStudents = () => {
 }
 
 export const addNewStudent = student => {
+    console.log('push');
     return fetch("api/students", {
         headers: {
             'Content-Type': 'application/json'
         },
         method: 'POST',
+        body: JSON.stringify(student),
+    });
+}
+
+export const deleteStudent = id => {   
+    return fetch(`api/students/${id}`, {
+        method: 'DELETE'
+    });
+}
+
+export const editStudent = student => {  
+    console.log('put');
+    return fetch("api/students", {
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        method: 'PUT',
         body: JSON.stringify(student),
     });
 }

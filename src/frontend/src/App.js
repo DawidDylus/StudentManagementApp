@@ -1,7 +1,7 @@
 import './App.css';
-import { getAllStudents } from "./client";
+import { getAllStudents, deleteStudent } from "./client";
 import React, { useState, useEffect } from 'react';
-import { Layout, Menu, Breadcrumb, Table, Spin, Empty, Button, Badge, Tag, Avatar } from 'antd';
+import { Layout, Menu, Breadcrumb, Table, Spin, Empty, Button, Badge, Tag, Avatar, Popconfirm, message } from 'antd';
 import {
   DesktopOutlined,
   PieChartOutlined,
@@ -32,6 +32,36 @@ function App() {
     </Avatar>;
   };
 
+  function confirm(e, student) {
+    deleteStudent(student.id)
+      .then(() => fetchStudents())
+      .finally(() => message.success(`Succesfully deleted student: ${student.name}`));
+  }
+
+  function cancel(e) {
+  }
+
+  function handleEdit(student) {   
+    setEditedStudent(student);    
+    setShowDrawer(true);
+  }
+
+  const ActionButtons = ({ student }) => {
+    return <>
+      <Button type='primary' style={{ marginLeft: '5px', marginRight: '5px' }} onClick={() => handleEdit(student)}>Edit</Button>
+      <Popconfirm
+        title="Are you sure to delete this task?"
+        onConfirm={(e) => confirm(e, student)}
+        onCancel={cancel}
+        okText="Yes"
+        cancelText="No"
+      >
+        <Button type='primary' danger style={{ marginLeft: '5px', marginRight: '5px' }}>Delete</Button>
+      </Popconfirm>
+
+    </>
+  }
+
   const columns = [
     {
       title: '',
@@ -58,9 +88,17 @@ function App() {
       title: 'Gender',
       dataIndex: 'gender',
       key: 'gender',
+    },
+    {
+      title: 'Actions',
+      dataIndex: 'actions',
+      key: 'actions',
+      render: (text, student) => <ActionButtons student={student} />
     }
 
   ];
+
+  const [editedStudent, setEditedStudent] = useState({});
 
   const [showDrawer, setShowDrawer] = useState(false);
   const [students, setStudents] = useState([]);
@@ -81,7 +119,6 @@ function App() {
     getAllStudents()
       .then(res => res.json())
       .then(data => {
-        console.log(data);
         setStudents(data);
         setFetching(false);
       });
@@ -95,14 +132,13 @@ function App() {
     if (students.length <= 0) {
       return <Empty />;
     }
-    return <>
-      <StudentDrawerForm setShowDrawer={setShowDrawer} showDrawer={showDrawer} fetchStudents={fetchStudents} />
+    return <>     
+      <StudentDrawerForm setShowDrawer={setShowDrawer} showDrawer={showDrawer} fetchStudents={fetchStudents} student={editedStudent} setStudent={setEditedStudent}/>
       <Table
         dataSource={students}
         columns={columns}
         bordered
         title={() => <>
-
           <Tag>Number of students</Tag>
           <Badge count={students.length} className="site-badge-count-4" />
           <br /><br />
