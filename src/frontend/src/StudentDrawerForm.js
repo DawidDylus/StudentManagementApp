@@ -24,8 +24,7 @@ function StudentDrawerForm({ showDrawer, setShowDrawer, fetchStudents, student =
         console.log(student);
         if (JSON.stringify(student) !== '{}') {
             const newStudent = Object.assign({}, stud);
-            newStudent.id = student.id;
-           
+            newStudent.id = student.id;           
             editStudent(newStudent)
                 .then(() => {
                     setShowDrawer(false);
@@ -33,7 +32,10 @@ function StudentDrawerForm({ showDrawer, setShowDrawer, fetchStudents, student =
                     successNotification("Student successfully edited!", `${newStudent.name}`);
                 })
                 .catch(err => {
-                    console.log(err);
+                    err.response.json()
+                    .then(res => {
+                        errorNotification("There was an issue", `${res.message} [statusCode:${res.status}] [${res.error}]`);
+                    });
                 })
                 .finally(() =>                    
                     setStudent({})                   
@@ -47,7 +49,10 @@ function StudentDrawerForm({ showDrawer, setShowDrawer, fetchStudents, student =
                     successNotification("Student successfully added!", `${stud.name} was added to the system.`);
                 })
                 .catch(err => {
-                    console.log(err);
+                    err.response.json()
+                    .then(res => {
+                        errorNotification("There was an issue", `${res.message} [statusCode:${res.status}] [${res.error}]`);
+                    });
                 });                
         }
         setSubmitting(false);  

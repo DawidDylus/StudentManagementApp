@@ -23,13 +23,13 @@ export const addNewStudent = student => {
         },
         method: 'POST',
         body: JSON.stringify(student),
-    });
+    }).then(checkStatus);
 }
 
 export const deleteStudent = id => {   
     return fetch(`api/students/${id}`, {
         method: 'DELETE'
-    });
+    }).then(checkStatus);
 }
 
 export const editStudent = student => {  
@@ -40,6 +40,5 @@ export const editStudent = student => {
         },
         method: 'PUT',
         body: JSON.stringify(student),
-    });
+    }).then(checkStatus);
 }
-

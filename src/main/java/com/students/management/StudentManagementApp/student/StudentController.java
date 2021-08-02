@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -20,20 +21,20 @@ public class StudentController {
     }
 
     @PostMapping
-    public ResponseEntity<Student> addStudent(@RequestBody Student student){
+    public ResponseEntity<Student> addStudent(@Valid @RequestBody Student student){
         studentService.addStudent(student);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PutMapping
-    public ResponseEntity<Student> editStudent(@RequestBody Student student){
+    public ResponseEntity<Student> editStudent(@Valid @RequestBody Student student){
        return ResponseEntity.ok(studentService.editStudent(student));
     }
 
     @DeleteMapping(path ="{id}")
     public ResponseEntity<Student> deleteStudent(@PathVariable Long id){
-        studentService.deleteStudent(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+            studentService.deleteStudent(id);
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
 }

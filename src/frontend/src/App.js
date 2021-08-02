@@ -13,6 +13,7 @@ import {
 } from '@ant-design/icons';
 
 import StudentDrawerForm from './StudentDrawerForm';
+import { errorNotification } from './Notification';
 
 function App() {
 
@@ -35,14 +36,20 @@ function App() {
   function confirm(e, student) {
     deleteStudent(student.id)
       .then(() => fetchStudents())
-      .finally(() => message.success(`Succesfully deleted student: ${student.name}`));
+      .then(() => message.success(`Succesfully deleted student: ${student.name}`))
+      .catch(err => {
+        console.log("Shit");
+        err.response.json().then(res => {
+          errorNotification("There was an issue", `${res.message} [statusCode:${res.status}] [${res.error}]`);
+        });
+      });
   }
 
   function cancel(e) {
   }
 
-  function handleEdit(student) {   
-    setEditedStudent(student);    
+  function handleEdit(student) {
+    setEditedStudent(student);
     setShowDrawer(true);
   }
 
@@ -120,8 +127,11 @@ function App() {
       .then(res => res.json())
       .then(data => {
         setStudents(data);
-        setFetching(false);
-      });
+      }).catch(err => {
+        err.response.json().then(res => {
+          errorNotification("There was an issue", `${res.message} [statusCode:${res.status}] [${res.error}]`)
+        });
+      }).finally(() => setFetching(false));
   }
 
   const RenderStudents = () => {
@@ -130,10 +140,20 @@ function App() {
     }
 
     if (students.length <= 0) {
-      return <Empty />;
+      return <>
+        <Table
+          dataSource={students}
+          columns={columns}
+          bordered
+          title={() => <>   
+            <Button size='small' type='primary' shape="round" icon={<PlusOutlined />} onClick={() => setShowDrawer(!showDrawer)} > Add New Student</Button>
+          </>}
+          pagination={{ pageSize: 50 }}
+          scroll={{ y: 550 }}
+          rowKey={(student) => student.id} />
+      </>;
     }
-    return <>     
-      <StudentDrawerForm setShowDrawer={setShowDrawer} showDrawer={showDrawer} fetchStudents={fetchStudents} student={editedStudent} setStudent={setEditedStudent}/>
+    return <>
       <Table
         dataSource={students}
         columns={columns}
@@ -183,6 +203,7 @@ function App() {
             <Breadcrumb.Item>Bill</Breadcrumb.Item>
           </Breadcrumb>
           <div className="site-layout-background" style={{ padding: 24, minHeight: 360 }}>
+            <StudentDrawerForm setShowDrawer={setShowDrawer} showDrawer={showDrawer} fetchStudents={fetchStudents} student={editedStudent} setStudent={setEditedStudent} />
             {RenderStudents()}
           </div>
         </Content>

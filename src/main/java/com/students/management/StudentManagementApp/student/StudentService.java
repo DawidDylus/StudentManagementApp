@@ -1,10 +1,11 @@
 package com.students.management.StudentManagementApp.student;
 
+import com.students.management.StudentManagementApp.student.exceptions.BadRequestException;
+import com.students.management.StudentManagementApp.student.exceptions.NotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @AllArgsConstructor
 @Service
@@ -17,13 +18,23 @@ public class StudentService {
     }
 
     public Student addStudent(Student student) {
-      return studentRepository.save(student);
+        // check if email already exists in the database.
+        if (studentRepository.selectExistsEmail(student.getEmail())){
+            throw new BadRequestException(
+                    String.format("This email: %s is already registered in database.", student.getEmail()));
+        }
+        return studentRepository.save(student);
     }
 
     public Student editStudent(Student student) {
         Student savedStudent = studentRepository.findById(student.getId())
-                    .orElseThrow(() -> new RuntimeException(
-                            String.format("Cannot Find Expense by ID %s", student.getId())));
+                    .orElseThrow(() -> new NotFoundException(
+                            String.format("Cannot Find Student by privded ID %s", student.getId())));
+
+        if (studentRepository.selectExistsEmail(student.getEmail()) && !student.getEmail().equals(savedStudent.getEmail()) ){
+            throw new BadRequestException(
+                    String.format("This email: %s is already registered in database.", student.getEmail()));
+        }
 
         savedStudent.setName((student.getName()));
         savedStudent.setEmail((student.getEmail()));
@@ -33,6 +44,9 @@ public class StudentService {
     }
 
     public void deleteStudent(Long id) {
+        studentRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("Item with id %s that's flagged for removal, could not be found!", id)));
         studentRepository.deleteById(id);
     }
 }
